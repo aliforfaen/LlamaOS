@@ -41,10 +41,11 @@ sudo pacman -S waybar rofi-wayland wl-clipboard clipman \
 
 # Extras
 paru -S swayosd sysauth wayland-bongocat-git
+```
 
 ## NVIDIA Bootloader Fix
 Add to `/etc/default/grub`:
-```
+```bash
 GRUB_CMDLINE_LINUX_DEFAULT="quiet nvidia_drm.modeset=1 nvidia_drm.fbdev=1"
 ```
 
@@ -72,4 +73,4 @@ sudo pacman -S timeshift timeshift-autosnap
 - Styling (plymouth, startup effects, screensaver).
 - Dotfile management via `stow`.
 - Testing Hyprspace workspaces.
-```
+
