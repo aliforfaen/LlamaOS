@@ -10,7 +10,6 @@ MISSING="$LOG_DIR/missing-packages.txt"
 echo "📦 Starting package installation..."
 echo "Missing packages will be logged in: $MISSING"
 
-# Safe pacman install
 safe_pacman_install() {
     for pkg in "$@"; do
         if pacman -Si "$pkg" &>/dev/null; then
@@ -22,17 +21,36 @@ safe_pacman_install() {
     done
 }
 
-# Safe yay install (AUR)
-safe_yay_install() {
+safe_aur_install() {
     for pkg in "$@"; do
-        if yay -Si "$pkg" &>/dev/null; then
-            yay -S --noconfirm --needed "$pkg"
+        if $AUR_HELPER -Si "$pkg" &>/dev/null; then
+            $AUR_HELPER -S --noconfirm --needed "$pkg"
             echo "✅ Installed (AUR): $pkg"
         else
             echo "⚠️ Not found in AUR: $pkg" | tee -a "$MISSING"
         fi
     done
 }
+
+# --- Ensure yay/paru exists ---
+if command -v yay >/dev/null 2>&1; then
+    AUR_HELPER="yay"
+    echo "🔧 Using yay for AUR installs."
+elif command -v paru >/dev/null 2>&1; then
+    AUR_HELPER="paru"
+    echo "🔧 Using paru for AUR installs."
+else
+    echo "⚠️ No AUR helper found. Installing yay..."
+    sudo pacman -S --noconfirm --needed git base-devel
+    if [ ! -d "$HOME/.yay" ]; then
+        git clone https://aur.archlinux.org/yay.git "$HOME/.yay"
+    fi
+    pushd "$HOME/.yay"
+    makepkg -si --noconfirm
+    popd
+    AUR_HELPER="yay"
+    echo "✅ yay installed successfully."
+fi
 
 # Official repo packages
 safe_pacman_install \
@@ -41,12 +59,8 @@ safe_pacman_install \
     foot kitty pavucontrol blueberry network-manager-applet
 
 # AUR packages
-if command -v yay >/dev/null 2>&1; then
-    safe_yay_install \
-        clipman timeshift-autosnap wayland-bongocat-git lazydocker
-else
-    echo "⚠️ yay not installed. Skipping AUR packages." | tee -a "$MISSING"
-fi
+safe_aur_install \
+    clipman timeshift-autosnap wayland-bongocat-git lazydocker
 
 echo "🎉 Package installation complete!"
 echo "Check $MISSING for skipped packages."
