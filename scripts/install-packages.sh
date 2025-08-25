@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # =========================================
-#  LlamaOS 🦙 Package Install Script (with yay)
+#  LlamaOS 🦙 Package Install Script (with yay + graceful failures)
 # =========================================
-# Installs all required packages (Arch + AUR)
-# with yay as the unified package manager.
+# Installs Arch repo packages and selected AUR packages
+# using yay. Skips modules if they fail to install instead of aborting.
 # -----------------------------------------
 
 set -e
@@ -42,7 +42,7 @@ sudo pacman -S --noconfirm --needed \
     hyprland xorg-xwayland \
     qt5-wayland qt6-wayland gtk3 gtk4 \
     xdg-desktop-portal-hyprland xdg-desktop-portal-wlr \
-    # Network / audio
+    # Networking / audio
     networkmanager network-manager-applet \
     pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber \
     bluez blueman pavucontrol \
@@ -68,14 +68,22 @@ sudo systemctl enable NetworkManager
 sudo systemctl enable bluetooth
 
 # =========================================
-# AUR packages
+# AUR packages with graceful error handling
 # =========================================
-echo ">>> Installing AUR packages via yay..."
-yay -S --noconfirm \
-    swayosd \
-    sysauth \
-    wayland-bongocat-git
+aur_install() {
+    pkg=$1
+    if yay -S --noconfirm "$pkg"; then
+        echo ">>> $pkg installed successfully."
+    else
+        echo "⚠️ Warning: Failed to install $pkg. Skipping..."
+    fi
+}
+
+echo ">>> Installing AUR packages..."
+aur_install swayosd
+aur_install sysauth
+aur_install wayland-bongocat-git
 
 echo
 echo ">>> Install complete! 🦙"
-echo "Reboot into SDDM, choose Hyprland session, and start customizing!"
+echo "Next: run ./scripts/postconfig.sh"

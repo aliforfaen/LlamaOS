@@ -1,17 +1,47 @@
-```markdown
-# Rice Box 🦙✨
+# 🦙 LlamaOS Rice Box
 
-Ideas & styling backlog for later:
+A backlog of customization & ricing ideas for LlamaOS. 
+These aren’t required for a base system install but are fun projects to explore later.
 
-- Eww (alternative bar/widgets).
-- Naming variants (Illamanati / LamArch).
-- Mako (light notif daemon, fallback to swaync).
-- Fancy SDDM themes.
-- "Supermenu" launcher (Walker expansion).
-- ASCII / startup terminal art, screensaver touches.
-- Nwg-shell (extra shell environment).
-- Waycorner (display corner tweaks).
-- Hyprchroma (shader/translucency plugin).
-- Hyprnavi (workspace navigation).
-- Hyprshell (workspace manager).
-```
+___
+
+## Styling notes
+- Named LlamaOS
+- Login greeter, Llama themed
+- Scientist LamaLab OS flavour
+- Terminal-ASCII Art, Omarchy style.
+
+---
+
+## Bar & Widgets
+- Eww (alternative to Waybar, fully custom widgets via CSS/HTML).
+- HyprPanel (modern integrated panel for Hyprland).
+- Waycorner (corner snapping/display tool).
+
+## Login & Greeter
+- Fancy SDDM themes (Illamanati branding idea).
+
+## Launchers & Menus
+- "Supermenu" app launcher concept (Omarchy’s Walker → extended with Rofi scripts).
+- nwg-shell (complete shell environment) — heavier, optional.
+
+## Effects & Styling
+- ASCII / startup splash art in terminal.
+- Screensaver‑like blur lockscreens.
+- Hyprchroma (shader / blur / translucency plugin).
+- Dynamic cursors (Hypr-dynamic-cursors).
+- Transitions and shadows tweaking.
+
+## Notifications
+- Mako (simple lightweight notifications).
+- swaync (notification center style, currently default).
+
+## Workspaces
+- Hyprspace (recommended advanced workspace manager).
+- Hyprnavi (simple workspace navigation).
+- Hyprshell (workspace/task switcher).
+
+## Fun Extras
+- Wayland BongoCat overlay.
+- ianny (break reminders / health check).
+- Custom Rofi menus for system updates, wallpapers, ricing toggles.

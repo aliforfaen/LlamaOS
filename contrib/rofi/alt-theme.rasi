@@ -1,0 +1,11 @@
+configuration {
+  font: "JetBrains Mono 12";
+  show-icons: true;
+  icon-theme: "Papirus";
+}
+* {
+  background: #1b2b34;
+  foreground: #cdd3de;
+  selected-background: #99c794;
+  selected-foreground: #1b2b34;
+}

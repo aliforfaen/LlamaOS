@@ -1,0 +1,14 @@
+{
+  "layer": "top",
+  "modules-left": ["hyprland/workspaces"],
+  "modules-center": ["clock"],
+  "modules-right": ["battery", "network", "pulseaudio", "tray"],
+
+  "clock": {
+    "format": "🦙 {:%A, %b %d - %H:%M}"
+  },
+  "battery": {
+    "format": "🔋 {capacity}%",
+    "format-charging": "⚡ {capacity}%"
+  }
+}
