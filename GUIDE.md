@@ -1,120 +1,159 @@
-```markdown
-# 🦙 LlamaOS Setup Guide 
+# 🦙 LlamaOS Full Installation Guide
 
-This guide describes how to install and configure LlamaOS — a customized Arch + Hyprland environment.
-
----
-
-## 1. Base Install
-- Use `archinstall`.
-- Filesystem: **BTRFS** with subvols `/@` and `/@home`.
-- Bootloader: **GRUB**.
-- Hostname: `llamaos`.
-- Kernel: `linux` or `linux-lts`.
-- Timezone: Europe/Oslo.
-- Keyboard: Norwegian.  
-- Locale: `en_US.UTF-8`.
-
-⚠️ Do **not** install a DE from the installer — we set it post-install.
+This guide explains how to install **LlamaOS** from scratch:
+- Bootable Arch Linux with BTRFS & Timeshift snapshots.
+- Hyprland compositor & ecosystem.
+- NVIDIA‑ready setup (RTX 3070 tested).
+- Automated post‑install with rollback‑friendly snapshots.
 
 ---
 
-## 2. Install Packages
-Clone repo and run:
+## 1. Installing Base Arch Linux (with `archinstall`)
 
+Boot into the Arch ISO and run:
 ```bash
-cd ~/LlamaOS/scripts
+archinstall
+```
+
+**Key settings:**
+- Disk Layout: `btrfs`
+  - Subvolumes: `/@` (root), `/@home` (home).
+- Bootloader: `grub`
+- Partitions: EFI partition + root (on BTRFS)
+- Encryption: OFF (dual boot‑friendly)
+- Hostname: `llamaos`
+- Kernel: `linux` or `linux-lts` (your choice)
+- Skip desktop environment → we’ll add Hyprland later
+
+**Timezone & Locale during install:**
+- Timezone: `Europe/Oslo`
+- Locale: enable `en_US.UTF-8` in `/etc/locale.gen`
+
+---
+
+## 2. Internet Connectivity
+
+Inside the Arch install or live ISO:
+
+- **Wired network**: usually works automatically.
+- **WiFi**:
+  ```bash
+  iwctl
+  station wlan0 scan
+  station wlan0 get-networks
+  station wlan0 connect SSID
+  ```
+  Then check with:
+  ```bash
+  ping archlinux.org
+  ```
+
+After install, NetworkManager will manage connections:
+```bash
+nmcli device wifi list
+nmcli device wifi connect "SSID" password "yourpassword"
+```
+
+---
+
+## 3. Bootstrap with Scripts
+
+Clone LlamaOS onto your new Arch system:
+```bash
+git clone https://github.com/<yourusername>/LlamaOS.git
+cd LlamaOS/scripts
+```
+
+Install all core system packages & yay AUR helper:
+```bash
 ./install-packages.sh
 ```
 
-This script:
-- Installs **Hyprland, Waybar, Rofi, NVIDIA drivers, Pipewire, File managers**.
-- Sets up **yay** as Omarchy-style AUR helper.
-- Installs extras: SwayOSD, sysauth, bongocat 🐱.
+- This script installs Hyprland, Waybar, Rofi, NVIDIA drivers, Pipewire, Thunar, Timeshift, and more.
+- ✅ All critical services are enabled: SDDM login, NetworkManager, Bluetooth.
+- ✅ yay installed for AUR (Omarchy‑style integration).
 
----
-
-## 3. Post Configuration
-Run the helper:
-
+Then apply locales, timezone, and dotfiles:
 ```bash
-cd ~/LlamaOS/scripts
 ./postconfig.sh
 ```
 
-This will:
-- Configure timezone (`Europe/Oslo`).
-- Set locale to English (with Norwegian keyboard).
-- Symlink dotfiles via `stow`.
+- Sets system language → English (US).
+- Keyboard → Norwegian.
+- Timezone → Europe/Oslo.
+- Symlinks configs for `hyprland`, `waybar`, `rofi`.
 
 ---
 
-## 4. Dotfiles
-Dotfiles live in `~/LlamaOS/dotfiles/`:
-- `hypr/` → Hyprland config (`hyprland.conf`).
-- `waybar/` → Bar with clock/network/audio/tray.
-- `rofi/` → App launcher config.
+## 4. After First Boot
 
-Apply with:
-```bash
-cd ~/LlamaOS/dotfiles
-stow -t ~/.config hypr waybar rofi
-```
-
----
-
-## 5. Rice Box
-All deferred “styling” projects are tracked in `RICEBOX.md`.
-
-Examples:
-- Eww (widgets/bar).
-- Fancy SDDM themes.
-- Omarchy “Supermenu”.
-- Startup splash art.
-- Hyprchroma shaders.
+- At login manager (**SDDM**) select **Hyprland**.
+- Try keybinds:
+  - `Super+Return` → terminal (Alacritty).
+  - `Super+D` → app launcher (Rofi).
+  - `Super+E` → Thunar.
+  - `Super+Esc` → logout power menu (`wleave`).
+- **Waybar** shows clock, network, bluetooth, audio, system tray.
+- **Volume & brightness keys** should Just Work™ with SwayOSD.
 
 ---
 
-## 6. Daily Use
+## 5. Error Handling & Rollbacks
 
-- **Terminal**: `Alacritty` (Super+Return).
-- **File Manager**: `Thunar` (Super+E).
-- **App Launcher**: `Rofi` (Super+D).
-- **Screenshot**: Select with `grim-hyprland + slurp`, annotate with `swappy`.
-- **Power Menu**: `wleave` (Super+Esc).
-- **Updates**:
+### Timeshift Snapshots
+LlamaOS uses `timeshift-autosnap`:
+- Before each update (`yay -Syu`) → snapshot taken.
+- If config or script breaks: boot from GRUB, restore snapshot.
+
+### Script Failures
+- Both scripts (`install-packages.sh`, `postconfig.sh`) are written to **exit safely**:
+  - If a package fails, install continues without it.
+  - If an optional AUR dependency breaks → warning printed, not fatal.
+- Example: if `wayland-bongocat-git` fails to build, everything else still installs. You can retry later with:
   ```bash
-  yay -Syu
+  yay -S wayland-bongocat-git
   ```
 
 ---
 
-# ✅ Next Steps
-After install:
-1. Snapshots enabled (Timeshift).
-2. Experiment with Hyprspace (workspaces).
-3. Pick items from **Rice Box**.
-4. Push your config updates to GitHub.
-```
+## 6. Troubleshooting
+
+- **No internet after install**: run `nmcli device wifi connect`.
+- **NVIDIA glitches**: add to `/etc/environment`:
+  ```bash
+  WLR_NO_HARDWARE_CURSORS=1
+  WLR_RENDERER=vulkan
+  ```
+- **Black screen at login**: check SDDM logs:
+  ```bash
+  journalctl -u sddm
+  ```
+- **Locale wrong?** rerun:
+  ```bash
+  sudo localectl set-locale LANG=en_US.UTF-8
+  ```
 
 ---
 
-## 🔧 Git Tracking: Suggested Commits
+## 7. Post‑Install Ideas (from RICEBOX)
 
-Here’s a clean commit journey:
+- Fractional scaling (Hyprland `monitor=,preferred,auto,0.9`).
+- Fancy SDDM themes (Illamanati branding 🕶🦙).
+- ASCII startup headers, terminal fun.
+- Extra workspace tools (Hyprspace).
+- Notification styling (swaync vs mako).
+- BongoCat overlay.
 
-```bash
-# Initial setup
-git add INSTALL.md PACKAGES.md RICEBOX.md .gitignore dotfiles scripts
-git commit -m "Initial LlamaOS setup: install plan, packages, ricebox, dotfiles, scripts"
+---
 
-# Add GUIDE.md and PDF
-git add GUIDE.md
-git commit -m "Add consolidated LlamaOS setup guide"
-pandoc GUIDE.md -o GUIDE.pdf
-git add GUIDE.pdf
-git commit -m "Export setup guide to PDF"
+# ✅ Summary
 
-# Push
-git push origin main
-```
+Install workflow:
+1. Boot with Arch ISO → `archinstall` minimal install with BTRFS + GRUB.
+2. Clone LlamaOS repo.
+3. Run:
+   ```bash
+   ./scripts/install-packages.sh
+   ./scripts/postconfig.sh
+   ```
+4. Reboot → login to Hyprland → LlamaOS ready to rice ✨.
