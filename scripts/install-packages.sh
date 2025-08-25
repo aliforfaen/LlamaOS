@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Logging
 LOG_DIR="$HOME/install-logs"
 mkdir -p "$LOG_DIR"
 MISSING="$LOG_DIR/missing-packages.txt"
@@ -10,6 +9,9 @@ MISSING="$LOG_DIR/missing-packages.txt"
 echo "📦 Starting package installation..."
 echo "Missing packages will be logged in: $MISSING"
 
+# ----------------------------
+# Helpers
+# ----------------------------
 safe_pacman_install() {
     for pkg in "$@"; do
         if pacman -Si "$pkg" &>/dev/null; then
@@ -32,7 +34,9 @@ safe_aur_install() {
     done
 }
 
-# --- Ensure yay/paru exists ---
+# ----------------------------
+# Ensure yay/paru exists
+# ----------------------------
 if command -v yay >/dev/null 2>&1; then
     AUR_HELPER="yay"
     echo "🔧 Using yay for AUR installs."
@@ -52,13 +56,23 @@ else
     echo "✅ yay installed successfully."
 fi
 
+# ----------------------------
 # Official repo packages
+# ----------------------------
 safe_pacman_install \
-    hyprland xorg-xwayland waybar thunar thunar-archive-plugin thunar-volman \
-    file-roller gvfs wl-clipboard cliphist grim slurp mako nwg-look wlogout \
-    foot kitty pavucontrol blueberry network-manager-applet
+    base-devel git wget curl unzip zip linux-headers \
+    nvidia nvidia-utils nvidia-settings \
+    sddm hyprland xorg-xwayland qt5-wayland qt6-wayland gtk3 gtk4 \
+    xdg-desktop-portal-hyprland xdg-desktop-portal-wlr \
+    networkmanager network-manager-applet \
+    bluez bluez-utils blueman \
+    pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber pavucontrol \
+    thunar thunar-archive-plugin thunar-volman file-roller gvfs \
+    waybar rofi-wayland hyprlock kitty foot mako nwg-look wl-clipboard cliphist grim slurp
 
+# ----------------------------
 # AUR packages
+# ----------------------------
 safe_aur_install \
     clipman timeshift-autosnap wayland-bongocat-git lazydocker
 
