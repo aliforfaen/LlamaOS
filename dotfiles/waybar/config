@@ -1,0 +1,25 @@
+// ~/.config/waybar/config
+{
+  "layer": "top",
+  "modules-left": ["hyprland/workspaces", "hyprland/window"],
+  "modules-center": ["clock"],
+  "modules-right": ["network", "bluetooth", "pulseaudio", "tray"],
+
+  "clock": {
+    "format": "{:%Y-%m-%d %H:%M:%S %Z}"
+  },
+  "pulseaudio": {
+    "format": " {volume}%",
+    "format-muted": " muted"
+  },
+  "network": {
+    "format-wifi": " {essid} ({signalStrength}%)",
+    "format-ethernet": " {ifname}",
+    "format-disconnected": "⚠ Disconnected"
+  },
+  "bluetooth": {
+    "format-connected": " {device_alias}",
+    "format-on": " on",
+    "format-off": " off"
+  }
+}

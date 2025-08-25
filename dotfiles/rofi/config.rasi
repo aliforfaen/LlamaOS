@@ -1,0 +1,10 @@
+/* ~/.config/rofi/config.rasi */
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    icon-theme: "Papirus";
+    font: "JetBrains Mono 12";
+    display-drun: "Apps";
+    drun-display-format: "{icon} {name}";
+    theme: "arc-dark";
+}
