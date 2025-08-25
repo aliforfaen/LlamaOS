@@ -1,53 +1,53 @@
 #!/usr/bin/env bash
-# =========================================
-#  LlamaOS 🦙 Post-Configuration Script
-# =========================================
-# Applies locale, timezone, keymap, and symlinks dotfiles
-# Run this *after* install-packages.sh on a fresh Arch base.
-# -----------------------------------------
+set -euo pipefail
 
-set -e
+LOG_DIR="$HOME/install-logs"
+mkdir -p "$LOG_DIR"
 
-echo ">>> Configuring locale and timezone..."
+echo "⚙️ Running post-install configuration..."
 
-# Locale: English (US), UI language
-sudo sed -i '/en_US.UTF-8/s/^#//' /etc/locale.gen
-echo "LANG=en_US.UTF-8" | sudo tee /etc/locale.conf
-sudo locale-gen
+# Ensure config directories exist
+mkdir -p "$HOME/.config"
 
-# Timezone: Europe/Oslo
-sudo timedatectl set-timezone Europe/Oslo
-
-# Keyboard: Norwegian layout (but English UI set above)
-sudo localectl set-x11-keymap no
-sudo localectl set-keymap no
-
-echo ">>> Locale, timezone and keymap done."
-
-# ------------------------------------------------------
-
-echo ">>> Setting up dotfiles with stow..."
-# Ensure stow is installed
-if ! command -v stow &>/dev/null; then
-    echo ">>> Installing stow..."
-    sudo pacman -S --noconfirm stow
+# Deploy Hyprland config if missing
+if [ ! -f "$HOME/.config/hypr/hyprland.conf" ]; then
+    mkdir -p "$HOME/.config/hypr"
+    cp ./dotfiles/hypr/hyprland.conf "$HOME/.config/hypr/"
+    echo "✅ Hyprland config deployed."
+else
+    echo "ℹ️ Hyprland config already exists, skipping."
 fi
 
-cd ~/LlamaOS/dotfiles
+# Deploy Waybar config if missing
+if [ ! -d "$HOME/.config/waybar" ]; then
+    mkdir -p "$HOME/.config"
+    cp -r ./dotfiles/waybar "$HOME/.config/"
+    echo "✅ Waybar config deployed."
+else
+    echo "ℹ️ Waybar config already exists, skipping."
+fi
 
-# Symlink configs into ~/.config
-stow -t ~/.config hypr
-stow -t ~/.config waybar
-stow -t ~/.config rofi
+# Deploy other configs (Thunar, kitty, etc.)
+for DIR in kitty thunar foot mako; do
+    if [ ! -d "$HOME/.config/$DIR" ]; then
+        cp -r "./dotfiles/$DIR" "$HOME/.config/" || true
+        echo "✅ Deployed config: $DIR"
+    else
+        echo "ℹ️ Config already exists: $DIR (skipped)"
+    fi
+done
 
-echo ">>> Dotfiles have been symlinked to ~/.config."
+# Locale fix (safe to rerun)
+sudo localectl set-locale LANG=en_US.UTF-8
 
-# ------------------------------------------------------
+# Enable services
+for svc in NetworkManager bluetoothd; do
+    if systemctl is-enabled --quiet "$svc"; then
+        echo "ℹ️ $svc already enabled."
+    else
+        sudo systemctl enable --now "$svc"
+        echo "✅ Enabled service: $svc"
+    fi
+done
 
-echo ">>> Enabling user services (swaync, clipman restore)..."
-# For example: notification daemon autostart
-systemctl --user enable --now swaync.service || true
-
-echo
-echo ">>> Post-install configuration complete! 🦙"
-echo "Reboot and log into Hyprland via SDDM to start using LlamaOS."
+echo "🎉 Post-install configuration complete!"
