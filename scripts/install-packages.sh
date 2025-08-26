@@ -74,7 +74,7 @@ safe_pacman_install \
 # AUR packages
 # ----------------------------
 safe_aur_install \
-    clipman timeshift-autosnap wayland-bongocat-git lazydocker
+    clipman timeshift-autosnap wayland-bongocat-git lazydocker nerd-fonts-meslo-lg
 
 echo "🎉 Package installation complete!"
 echo "Check $MISSING for skipped packages."
